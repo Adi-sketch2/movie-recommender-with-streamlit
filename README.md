@@ -110,4 +110,4 @@ streamlit run app.py
 
 ## Author
 
-Adi
+Aditya Bhatt
