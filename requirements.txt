@@ -1,6 +1,14 @@
 streamlit
 pandas
+<<<<<<< HEAD
 scikit-learn
 requests
 python-dotenv
 gdown
+=======
+numpy
+scikit-learn
+requests
+python-dotenv
+gdown
+>>>>>>> 72ed5c21d39dfb896c5aaed809d86d4260af7a69
