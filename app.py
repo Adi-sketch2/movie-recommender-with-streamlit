@@ -53,10 +53,16 @@ def fetch_poster(movie_title):
     url = f"http://www.omdbapi.com/?t={clean_title}&apikey={api_key}"
     data = requests.get(url).json()
 
-    if data.get('Response') == 'True' and data.get('Poster') != "N/A":
-        return data.get('Poster')
+    poster = "https://via.placeholder.com/300x450.png?text=No+Image"
+    rating = "N/A"
 
-    return "https://via.placeholder.com/300x450.png?text=No+Image"
+    if data.get('Response') == 'True':
+        if data.get('Poster') != "N/A":
+            poster = data.get('Poster')
+        if data.get('imdbRating') != "N/A":
+            rating = data.get('imdbRating')
+
+    return poster, rating
 
 def recommend(movie):
     movie_lower = movie.lower()
@@ -69,7 +75,7 @@ def recommend(movie):
         match = difflib.get_close_matches(movie, movie_list, n=1)
 
         if not match:
-            return [], []
+            return [], [], []
 
         movie = match[0]
 
@@ -82,20 +88,24 @@ def recommend(movie):
 
     names = []
     posters = []
+    ratings = []
 
     for i in movies_list:
         title = new_df.iloc[i[0]].title
-        names.append(title)
-        posters.append(fetch_poster(title))
+        poster, rating = fetch_poster(title)
 
-    return names, posters
+        names.append(title)
+        posters.append(poster)
+        ratings.append(rating)
+
+    return names, posters, ratings
 
 movie_name = st.text_input("Enter a movie name")
 
 if st.button("Recommend"):
     if movie_name:
         with st.spinner("Loading..."):
-            names, posters = recommend(movie_name)
+            names, posters, ratings = recommend(movie_name)
 
         st.markdown("## Top Recommendations")
         st.markdown("<br>", unsafe_allow_html=True)
@@ -107,6 +117,7 @@ if st.button("Recommend"):
                 st.markdown("<div class='movie-card'>", unsafe_allow_html=True)
                 st.image(posters[i])
                 st.markdown(f"<h5>{names[i]}</h5>", unsafe_allow_html=True)
+                st.markdown(f"<p style='color:gold;'>⭐ {ratings[i]}</p>", unsafe_allow_html=True)
                 st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.warning("Please enter a movie name")
