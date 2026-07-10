@@ -27,26 +27,33 @@ st.markdown("<h1 style='text-align: center;'>Movie Recommendation System</h1>", 
 st.markdown("<h4 style='text-align: center;'>Find movies similar to your favorites</h4>", unsafe_allow_html=True)
 
 load_dotenv()
-api_key = os.getenv("OMDB_API_KEY")
+api_key = os.getenv("OMDB_API_KEY") or st.secrets.get("OMDB_API_KEY")
 
-if not os.path.exists("models"):
-    os.makedirs("models")
 
 MOVIES_URL = "https://drive.google.com/uc?id=1PXVAz5R4jFvCGqPgurN0DZEWtNBwpaFh"
 SIMILARITY_URL = "https://drive.google.com/uc?id=1R3BqI3HKtm-y-9ZfqTAzktTNmESBX_FP"
 
-if (not os.path.exists("models/movies.pkl") or 
-    not os.path.exists("models/similarity.pkl")):
+@st.cache_resource
+def load_data():
+    if not os.path.exists("models"):
+       os.makedirs("models")
 
-    with st.spinner("Downloading model, please wait..."):
-        if not os.path.exists("models/movies.pkl"):
-            gdown.download(MOVIES_URL, "models/movies.pkl", quiet=False)
+    if (not os.path.exists("models/movies.pkl") or 
+       not os.path.exists("models/similarity.pkl")):
 
-        if not os.path.exists("models/similarity.pkl"):
-            gdown.download(SIMILARITY_URL, "models/similarity.pkl", quiet=False)
+       with st.spinner("Downloading model, please wait..."):
+           if not os.path.exists("models/movies.pkl"):
+               gdown.download(MOVIES_URL, "models/movies.pkl", quiet=False)
 
-new_df = pickle.load(open('models/movies.pkl','rb'))
-similarity = pickle.load(open('models/similarity.pkl','rb'))
+           if not os.path.exists("models/similarity.pkl"):
+               gdown.download(SIMILARITY_URL, "models/similarity.pkl", quiet=False)
+
+    new_df = pickle.load(open('models/movies.pkl','rb'))
+    similarity = pickle.load(open('models/similarity.pkl','rb'))
+    return new_df, similarity
+
+new_df,similarity = load_data()
+
 
 def fetch_poster(movie_title):
     clean_title = movie_title.split("(")[0]
